@@ -1,6 +1,6 @@
 # Cloud
 
-Compose files for my home cloud
+Compose files for my home cloud.
 
 ## General
 
