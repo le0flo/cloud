@@ -1,0 +1,10 @@
+services:
+  website:
+    container_name: "cloud-website"
+    restart: "unless-stopped"
+    build:
+      context: "../src/leoflo.me"
+      dockerfile: "Dockerfile"
+
+    ports:
+      - "${CLOUD_HOST:-0.0.0.0}:9000:8080"

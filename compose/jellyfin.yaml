@@ -1,0 +1,30 @@
+services:
+  jellyfin:
+    container_name: "cloud-jellyfin"
+    restart: "unless-stopped"
+    image: "jellyfin/jellyfin:latest"
+
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "jellyfin-cache:/cache"
+      - "jellyfin-config:/config"
+
+      - type: "bind"
+        source: "/mnt/media/series"
+        target: "/media/series"
+        read_only: true
+
+      - type: "bind"
+        source: "/mnt/media/films"
+        target: "/media/films"
+        read_only: true
+
+    ports:
+      - "${CLOUD_HOST:-0.0.0.0}:9004:8096"
+
+volumes:
+  jellyfin-cache:
+    external: true
+  jellyfin-config:
+    external: true

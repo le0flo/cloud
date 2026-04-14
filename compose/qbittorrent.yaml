@@ -1,0 +1,29 @@
+services:
+  qbittorrent:
+    container_name: "cloud-qbittorrent"
+    restart: "unless-stopped"
+    image: "qbittorrentofficial/qbittorrent-nox:latest"
+
+    environment:
+      QBT_LEGAL_NOTICE: "confirm"
+      QBT_VERSION: "latest"
+      QBT_WEBUI_PORT: 9005
+
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "qbittorrent-config:/config"
+
+      - type: "bind"
+        source: "/mnt/media/downloads"
+        target: "/downloads"
+        read_only: false
+
+    ports:
+      - "6881:6881/tcp"
+      - "6881:6881/udp"
+      - "${CLOUD_HOST:-0.0.0.0}:9005:9005/tcp"
+
+volumes:
+  qbittorrent-config:
+    external: true

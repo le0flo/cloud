@@ -1,0 +1,58 @@
+services:
+  paperless-cache:
+    container_name: "cloud-paperless-cache"
+    restart: "unless-stopped"
+    image: "redis:latest"
+
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "paperless-cache:/data"
+
+    networks:
+      - "paperless"
+
+  paperless:
+    container_name: "cloud-paperless"
+    restart: "unless-stopped"
+    image: "ghcr.io/paperless-ngx/paperless-ngx:latest"
+
+    depends_on:
+      - "paperless-cache"
+
+    environment:
+      PAPERLESS_REDIS: "redis://paperless-cache:6379"
+      PAPERLESS_SECRET_KEY: "${PAPERLESS_SECRET_KEY}"
+      PAPERLESS_TRUSTED_PROXIES: "https://papers.home.arpa"
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: "https://papers.home.arpa"
+      PAPERLESS_URL: "https://papers.home.arpa"
+
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "paperless-data:/usr/src/paperless/data"
+      - "paperless-media:/usr/src/paperless/media"
+      - "paperless-export:/usr/src/paperless/export"
+      - "paperless-consume:/usr/src/paperless/consume"
+
+    networks:
+      - "paperless"
+
+    ports:
+      - "${CLOUD_HOST:-0.0.0.0}:9003:8000"
+
+volumes:
+  paperless-cache:
+    external: true
+  paperless-data:
+    external: true
+  paperless-media:
+    external: true
+  paperless-export:
+    external: true
+  paperless-consume:
+    external: true
+
+networks:
+  paperless:
+    name: "cloud-paperless-net"

@@ -1,0 +1,30 @@
+services:
+  navidrome:
+    container_name: "cloud-navidrome"
+    restart: "unless-stopped"
+    image: "deluan/navidrome:latest"
+
+    environment:
+      ND_DEFAULTTHEME: "Gruvbox Dark"
+
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "navidrome-data:/data"
+
+      - type: "bind"
+        source: "/mnt/media/music/leo"
+        target: "/media/music/leo"
+        read_only: true
+
+      - type: "bind"
+        source: "/mnt/media/music/alice"
+        target: "/media/music/alice"
+        read_only: true
+
+    ports:
+      - "${CLOUD_HOST:-0.0.0.0}:9001:4533"
+
+volumes:
+  navidrome-data:
+    external: true

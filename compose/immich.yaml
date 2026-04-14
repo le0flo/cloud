@@ -1,0 +1,71 @@
+services:
+  immich-cache:
+    container_name: "cloud-immich-cache"
+    restart: "unless-stopped"
+    image: "docker.io/valkey/valkey:8-bookworm"
+
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "immich-cache:/data"
+
+    networks:
+      - "immich"
+
+  immich-database:
+    container_name: "cloud-immich-database"
+    restart: "unless-stopped"
+    image: "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0"
+
+    environment:
+      POSTGRES_USER: "${IMMICH_DB_USERNAME}"
+      POSTGRES_PASSWORD: "${IMMICH_DB_PASSWORD}"
+      POSTGRES_DB: "immich"
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+
+    shm_size: "128mb"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "immich-database:/var/lib/postgresql"
+
+    networks:
+      - "immich"
+
+  immich:
+    container_name: "cloud-immich"
+    restart: "unless-stopped"
+    image: "ghcr.io/immich-app/immich-server:release"
+
+    depends_on:
+      - "immich-cache"
+      - "immich-database"
+
+    environment:
+      REDIS_HOSTNAME: "immich-cache"
+      DB_HOSTNAME: "immich-database"
+      DB_USERNAME: "${IMMICH_DB_USERNAME}"
+      DB_PASSWORD: "${IMMICH_DB_PASSWORD}"
+
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+      - "immich-data:/data"
+
+    networks:
+      - "immich"
+
+    ports:
+      - "${CLOUD_HOST:-0.0.0.0}:9002:2283"
+
+volumes:
+  immich-cache:
+    external: true
+  immich-database:
+    external: true
+  immich-data:
+    external: true
+
+networks:
+  immich:
+    name: "cloud-immich-net"
